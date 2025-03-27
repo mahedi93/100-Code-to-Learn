@@ -48,7 +48,7 @@ int main() {
     addVehicle(&fleet, v2);
 
     // Adding sensors to vehicles
-    addSensor(&fleet.vehicles[0], "Temperature", 85.2);
+    addSensor(&fleet.vehicles[1], "Temperature", 85.2);
     addSensor(&fleet.vehicles[0], "Oil Pressure", 30.5);
     addSensor(&fleet.vehicles[1], "Brake Fluid", 12.7);
 
@@ -57,8 +57,13 @@ int main() {
     displayFleet(&fleet);
 
     // Displaying sensor data
-    printf("\nSensor Data for %s %s:\n", fleet.vehicles[0].make, fleet.vehicles[0].model);
-    displaySensorData(&fleet.vehicles[0]);
+
+    for(int j=0; j<MAX_VEHICLES; j++){
+    printf("\nSensor Data for %s %s:\n", fleet.vehicles[j].make, fleet.vehicles[j].model);
+    displaySensorData(&fleet.vehicles[j]);
+
+    }
+
 
     // Updating mileage
     updateMileage(&fleet.vehicles[0], 18000);
