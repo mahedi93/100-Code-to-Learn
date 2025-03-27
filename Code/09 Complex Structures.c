@@ -59,7 +59,7 @@ int main() {
     // Displaying sensor data
 
     for(int j=0; j<MAX_VEHICLES; j++){
-    printf("\nSensor Data for %s %s:\n", fleet.vehicles[j].make, fleet.vehicles[j].model);
+    printf("\nSensor Data for Vehicle: %d %s %s:\n", (j+1),fleet.vehicles[j].make, fleet.vehicles[j].model);
     displaySensorData(&fleet.vehicles[j]);
 
     }
