@@ -1,0 +1,137 @@
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+#include <unistd.h> // For sleep()
+#include <stdlib.h> // For rand()
+
+#define MAX_VEHICLES 5
+#define MAX_SENSORS 3
+
+// Sensor Types
+typedef enum {
+    TEMPERATURE_SENSOR,
+    SPEED_SENSOR,
+    FUEL_SENSOR
+} SensorType;
+
+// Sensor Data Structure
+typedef struct {
+    SensorType type;
+    uint16_t value;
+} SensorData;
+
+// Vehicle Structure
+typedef struct {
+    char id[10];
+    SensorData sensors[MAX_SENSORS];
+    uint8_t status;
+} Vehicle;
+
+// Fleet Management
+typedef struct {
+    Vehicle vehicles[MAX_VEHICLES];
+    uint8_t count;
+} FleetManager;
+
+// Global Fleet Object
+FleetManager fleet;
+
+// Function Prototypes
+void addVehicle(char *id, uint8_t status);
+void assignRandomSensors(Vehicle *vehicle);
+void updateSensorData(Vehicle *vehicle);
+void processFleet();
+void processTemperature(SensorData *sensor);
+void processSpeed(SensorData *sensor);
+void processFuel(SensorData *sensor);
+
+// Function Pointer for Sensor Processing
+typedef void (*SensorProcessor)(SensorData *);
+
+// Function Pointer Array for Sensor Processing
+SensorProcessor sensorHandlers[] = {
+    processTemperature,
+    processSpeed,
+    processFuel
+};
+
+// Function to Add a Vehicle
+void addVehicle(char *id, uint8_t status) {
+    if (fleet.count < MAX_VEHICLES) {
+        strcpy(fleet.vehicles[fleet.count].id, id);  // Using strcpy() as requested
+        fleet.vehicles[fleet.count].status = status;
+        fleet.count++;
+    }
+}
+
+// Assign Initial Sensor Data
+void assignRandomSensors(Vehicle *vehicle) {
+    for (int i = 0; i < MAX_SENSORS; i++) {
+        vehicle->sensors[i].type = (SensorType)i;
+        vehicle->sensors[i].value = (rand() % 50) + 10; // Random sensor values between 10-59
+    }
+}
+
+// Update Sensor Data in Real Time
+void updateSensorData(Vehicle *vehicle) {
+    for (int i = 0; i < MAX_SENSORS; i++) {
+        int change = (rand() % 5) - 2; // Random fluctuation between -2 and +2
+        vehicle->sensors[i].value += change;
+
+        // Keep values within realistic limits
+        if (vehicle->sensors[i].type == TEMPERATURE_SENSOR && vehicle->sensors[i].value > 100) 
+            vehicle->sensors[i].value = 100;
+        if (vehicle->sensors[i].type == SPEED_SENSOR && vehicle->sensors[i].value > 200) 
+            vehicle->sensors[i].value = 200;
+        if (vehicle->sensors[i].type == FUEL_SENSOR && vehicle->sensors[i].value > 100) 
+            vehicle->sensors[i].value = 100;
+    }
+}
+
+// Process Temperature Sensor
+void processTemperature(SensorData *sensor) {
+    printf("Temperature: %d°C\n", sensor->value);
+}
+
+// Process Speed Sensor
+void processSpeed(SensorData *sensor) {
+    printf("Speed: %d km/h\n", sensor->value);
+}
+
+// Process Fuel Sensor
+void processFuel(SensorData *sensor) {
+    printf("Fuel Level: %d%%\n", sensor->value);
+}
+
+// Process the Entire Fleet
+void processFleet() {
+    for (int i = 0; i < fleet.count; i++) {
+        printf("\nVehicle ID: %s\n", fleet.vehicles[i].id);
+        
+        // Update sensor data dynamically
+        updateSensorData(&fleet.vehicles[i]);
+
+        // Process each sensor
+        for (int j = 0; j < MAX_SENSORS; j++) {
+            sensorHandlers[fleet.vehicles[i].sensors[j].type](&fleet.vehicles[i].sensors[j]);
+        }
+    }
+}
+
+int main() {
+    fleet.count = 0;
+
+    // Adding vehicles
+    addVehicle("VH123", 1);
+    assignRandomSensors(&fleet.vehicles[0]);
+    addVehicle("VH456", 1);
+    assignRandomSensors(&fleet.vehicles[1]);
+
+    // Real-Time Simulation
+    while (1) {
+        processFleet();
+        sleep(3); // Wait 3 seconds before updating again
+    }
+
+    return 0;
+}
