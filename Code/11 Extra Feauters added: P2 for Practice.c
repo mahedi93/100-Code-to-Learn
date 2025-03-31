@@ -90,13 +90,29 @@ void assignRandomSensors(Vehicle *vehicle) {
 }
 
 // Update Sensor Data in Real Time
+
+// Update Sensor Data in Real Time and Randomly Add More Sensors
 void updateSensorData(Vehicle *vehicle) {
     for (int i = 0; i < vehicle->sensor_count; i++) {
         int change = (rand() % 5) - 2; // Random fluctuation between -2 and +2
         vehicle->sensors[i].value += change;
         checkSensorFault(&vehicle->sensors[i]); // Check for faults
     }
+
+    // Randomly add a new sensor if vehicle has space
+    if (vehicle->sensor_count < MAX_SENSORS) {
+        int add_new_sensor = rand() % 10; // 30% chance to add a new sensor
+        if (add_new_sensor < 3) {
+            int new_index = vehicle->sensor_count;
+            vehicle->sensors[new_index].type = (SensorType)(rand() % MAX_SENSORS); // Random sensor type
+            vehicle->sensors[new_index].value = (rand() % 50) + 10; // Assign random value
+            vehicle->sensors[new_index].is_faulty = 0; // Initially not faulty
+            vehicle->sensor_count++;
+            printf("🚗 Vehicle %s added new sensor type %d!\n", vehicle->id, vehicle->sensors[new_index].type);
+        }
+    }
 }
+
 
 // Check if Sensor is Faulty
 void checkSensorFault(SensorData *sensor) {
@@ -154,8 +170,8 @@ void logSensorData(Vehicle *vehicle) {
     fprintf(logFile, "\n[%s] Vehicle ID: %s\n", ctime(&now), vehicle->id);
 
     for (int i = 0; i < vehicle->sensor_count; i++) {
-        fprintf(logFile, "Sensor Type: %d, Value: %d %s\n", 
-                vehicle->sensors[i].type, 
+        fprintf(logFile, "Sensor Type: %d, Value: %d %s\n",
+                vehicle->sensors[i].type,
                 vehicle->sensors[i].value,
                 vehicle->sensors[i].is_faulty ? "[FAULTY]" : "");
     }
